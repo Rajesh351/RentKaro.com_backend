@@ -6,65 +6,65 @@ require("dotenv").config();
 
 // Signup Controller
 exports.signup = async (req, res) => {
-    try {
-        const {name,email,password}= req.body;
-      
-        // Check if all fields are provided
-        if (!name || !email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
+  try {
+    const { name, email, password } = req.body;
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "User already exists. Please log in.",
-            });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create new user
-        const user = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-        });
-        
-        return res.status(201).json({
-            success: true,
-            user,
-            message: "User registered successfully",
-        });
-    } catch (error) {
-        
-        return res.status(500).json({
-            success: false,
-            message: "User registration failed. Please try again.",
-        });
+    // Check if all fields are provided
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists. Please log in.",
+      });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    return res.status(201).json({
+      success: true,
+      user,
+      message: "User registered successfully",
+    });
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: "User registration failed. Please try again.",
+    });
+  }
 };
 
 
 
 exports.logout = async (req, res) => {
-    try {
-      
-        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-            message: "Logged out successfully.",
-            success: true
-        })
-    } catch (error) {
-       return res.status(500).json({
-            success: false,
-            message: "Logout failed. Please try again.",
-        });
-    }
+  try {
+
+    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+      message: "Logged out successfully.",
+      success: true
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed. Please try again.",
+    });
+  }
 }
 
 
@@ -126,7 +126,12 @@ exports.login = async (req, res) => {
     // ✅ Format as array of objects: { _id, name }
     const senderIds = Array.from(senderMap.entries()).map(([id, name]) => ({ _id: id, name }));
 
-    res.cookie("token", token, options).status(200).json({
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    }).status(200).json({
       success: true,
       token,
       user: {
@@ -134,9 +139,10 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
       },
-      senderIds, // ✅ Now includes name too
+      senderIds,
       message: "User Login Success",
     });
+
 
   } catch (error) {
 
