@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 const corsOptions = {
-    origin: process.env.HOST,
+    origin: [process.env.HOST, process.env.CLIENT_URL],
     credentials: true
 }
 app.use(cors(corsOptions));
@@ -22,7 +22,7 @@ const server = http.createServer(app);
 // Initialize socket.io with the HTTP server
 const io = new Server(server, {
     cors: {
-        origin: process.env.HOST,
+        origin: [process.env.HOST, process.env.CLIENT_URL],
         methods: ["GET", "POST", "dELETE", "PUT"],
         allowedHeaders: ["Content-Type"],
         credentials: true
