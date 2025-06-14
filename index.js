@@ -3,7 +3,7 @@ const dbconncet = require('./config/db');
 const cookieParser = require('cookie-parser');
 const userRoute = require("./route/userRoute")
 const cors = require('cors');
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 const ProductsRoute = require("./route/Products")
 const { Server } = require("socket.io");
 const Message = require("./model/Message")
